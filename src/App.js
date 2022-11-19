@@ -1,22 +1,54 @@
-import logo from './logo.svg';
 import './App.css';
+import { getFilmList, searchFilm } from './api';
+import { useEffect, useState } from "react";
 
-function App() {
+const App = () => {
+  const [popularFilm, setPopularFilm] = useState([])
+
+  // lifecycle to render first when open browser
+  useEffect(() => {
+    getFilmList().then((result) => {
+      setPopularFilm(result)
+    })
+  }, [])
+
+  const PopularFilmList = () =>{
+    return popularFilm.map((film, i) => {
+      return(
+        <div className="film-wrapper" key={i}>
+            <div className="film-title">{film.title}</div>
+            <img 
+              className="film-img" 
+              src={`${process.env.REACT_APP_BASEIMGURL}/${film.poster_path}`}
+            />
+            <div className="film-date">release : {film.release_date}</div>
+            <div className="film-rate">{film.vote_average}</div>
+          </div>
+      )
+    })
+  }
+
+  const search = async(q) => {
+    if (q.length > 3){
+      const query = await searchFilm(q)
+      setPopularFilm(query.results)
+      console.log({ query: query})
+    }
+  }
+console.log({ popularFilm: popularFilm })
+
   return (
     <div className="App">
       <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
+        <h1>Albarafi Movie</h1>
+        <input 
+          placeholder="cari film favorit..." 
+          class="film-search" 
+          onChange ={({ target }) => search(target.value)}
+        />
+        <div className="film-container">
+          <PopularFilmList />
+        </div>
       </header>
     </div>
   );
